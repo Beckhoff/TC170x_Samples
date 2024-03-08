@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.3">
+  <POU Name="MAIN" Id="{6d192366-32dc-4bff-a587-2db1831cc73a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	fbrtmode : FB_RtMode; 
+	n :DINT; 
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[n := n+1; 
+//Using ADS
+MAIN_ExternalTick(); 
+MAIN_FastAsPossible();
+ 
+//Using ITc
+MAIN_ExternalTick_ITc(); 
+MAIN_FastAsPossible_ITc(); 
+
+//Using Functions 
+MAIN_ExternalTick_F(); 
+MAIN_SelfTicks_F(); 
+MAIN_FastAsPossible_F();
+ 
+
+ 
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="25" Count="0" />
+      <LineId Id="3" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

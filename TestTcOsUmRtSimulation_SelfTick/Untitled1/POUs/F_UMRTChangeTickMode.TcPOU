@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4025.18">
+  <POU Name="F_UMRTChangeTickMode" Id="{aba41d37-e399-4a09-a9aa-d20d361a55af}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_UMRTChangeTickMode : HRESULT
+VAR_INPUT
+		eMode : E_RtMode;
+END_VAR
+VAR
+	ip : ITcRTimeSimulation;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_UMRTChangeTickMode := FW_ObjMgr_GetObjectInstance(oid:=16#02000000 (* Instance of RTIme*), iid:=TC_GLOBAL_IID_LIST.IID_ITcRTimeSimulation, pipUnk:=ADR(ip));
+IF SUCCEEDED(F_UMRTChangeTickMode) AND ip <> 0 THEN
+	F_UMRTChangeTickMode := ip.ChangeTickMode(eMode);
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_UMRTChangeTickMode">
+      <LineId Id="22" Count="4" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

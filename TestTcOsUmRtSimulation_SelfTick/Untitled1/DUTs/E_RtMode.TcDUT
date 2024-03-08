@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4025.18">
+  <DUT Name="E_RtMode" Id="{ebd7262d-038e-43d4-93ce-329757f74896}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_RtMode :  
+(
+	RtMode_Invalid := 16#FFFFFFFF,
+	RtMode_FastAsPossible := 2,
+	RtMode_Externaltick := 3,
+	RtMode_Cyclic := 4
+) UDINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

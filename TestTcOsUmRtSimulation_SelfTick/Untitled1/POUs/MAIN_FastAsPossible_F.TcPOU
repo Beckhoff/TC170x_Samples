@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4025.18">
+  <POU Name="MAIN_FastAsPossible_F" Id="{a378a544-45c4-49c9-a8df-52f86201d449}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_FastAsPossible_F
+VAR
+	state : INT := 0;	
+	bStart : BOOL; 
+	hr: HRESULT;
+	eCurrentMode : E_RtMode; 
+END_VAR
+
+
+VAR_OUTPUT 
+	value AT %Q* : UDINT;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE state OF
+	0:
+		IF(bStart = TRUE) THEN 		
+			state:= 1;
+			value:=100; // steps to decrement as Cyclic 
+		END_IF
+	1:
+		hr := F_UMRTGetTickMode(eCurrentMode);  
+		IF(SUCCEEDED(hr) AND eCurrentMode = E_RtMode.RtMode_Cyclic) THEN 
+			value:=value-1; //decrementing Cyclic (near realtime speed) 
+			IF value = 0 THEN
+				state := 2;
+				value:=100000; // Steps to decrement as a FastAsPossible 						
+				(*switch to fastaspossible mode*)			
+				hr := F_UMRTChangeTickMode(E_RtMode.RtMode_FastAsPossible);
+			END_IF 	
+		ELSE 
+			state := 98; // ERROR 
+		END_IF
+	2:
+		hr := F_UMRTGetTickMode(eCurrentMode);  
+		IF(SUCCEEDED(hr) AND eCurrentMode = E_RtMode.RtMode_FastAsPossible) THEN 
+			value:=value-1; //decrementing as fast as possible 
+			IF value = 0 THEN
+				(*switch back to cyclic mode*)			
+				state := 0;
+				hr := F_UMRTChangeTickMode(E_RtMode.RtMode_Cyclic);			
+			END_IF
+		ELSE 
+			state := 99; // ERROR 
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_FastAsPossible_F">
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="206" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="208" Count="1" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

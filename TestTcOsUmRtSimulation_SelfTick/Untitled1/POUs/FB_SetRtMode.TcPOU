@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4025.18">
+  <POU Name="FB_SetRtMode" Id="{48b6c207-7f6a-469a-adbb-130e1b0fba82}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetRtMode
+VAR_INPUT
+	rtMode				: E_RtMode;
+	bExecute			: BOOL;(* Rising edge at this input starts command execution *)
+	tTimeout			: TIME:=T#5S;
+END_VAR
+VAR_OUTPUT
+	bBusy				: BOOL;
+	bError				: BOOL;
+	nErrId				: UDINT;
+END_VAR
+VAR
+	state 				: UDINT;
+	RisingEdge			: R_TRIG;
+	_rtMode				: UDINT;
+	fbAdsWrite			: ADSWRITE := ( NETID := '', PORT := AMSPORT_R0_RTIME, IDXGRP := 1 (*RTADSGRP_SYSDATA*), IDXOFFS:=16#32 (* RTADSOFFS_SYSDATA_TICK_MODE*) );	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[RisingEdge( CLK:= bExecute );
+CASE state OF
+	0:
+		IF RisingEdge.Q THEN
+			(* reset outputs *)
+			bBusy := TRUE;
+			bError := FALSE;
+			nErrId := 0;
+			
+//			_rtMode := INT_TO_UDINT(rtMode); 
+			_rtMode := rtMode; 
+			(* calculate the required source buffer byte size *)
+			fbAdsWrite( WRITE := FALSE );
+			(* start command execution *)
+			fbAdsWrite( LEN := SIZEOF(_rtMode), SRCADDR:= ADR(_rtMode), WRITE := TRUE, TMOUT := tTimeout );
+			(* go to the wait state *)
+			state := 1;			
+		END_IF
+	1:(* wait until fb not busy *)
+		fbAdsWrite( WRITE := FALSE, BUSY=>bBusy, ERR=>bError, ERRID=>nErrID );
+		IF NOT fbAdsWrite.BUSY THEN
+			state := 0;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SetRtMode">
+      <LineId Id="34" Count="7" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="65" Count="5" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

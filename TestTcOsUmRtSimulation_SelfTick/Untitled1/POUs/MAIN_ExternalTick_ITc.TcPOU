@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4025.18">
+  <POU Name="MAIN_ExternalTick_ITc" Id="{48e6b319-61e7-4ea4-a65a-63a86a651863}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_ExternalTick_ITc
+VAR
+	fbRtmode : FB_RtMode; 
+	
+	state : INT := 0;	
+	bStart : BOOL; 
+	hint: STRING;
+	hr: HRESULT;
+	eCurrentMode: E_RtMode;
+END_VAR
+
+VAR_OUTPUT 
+	value AT %Q* : UDINT;	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[hr := fbrtmode.ip.GetTickMode(eCurrentMode);
+
+CASE state OF
+	0:
+		IF(bStart = TRUE) THEN 		
+			state:= 1;
+			value:=100; // steps to decrement as Cyclic
+			hint := '..cycling...'; 		
+		END_IF
+	1:
+		IF(eCurrentMode = E_RtMode.RtMode_Cyclic) THEN 
+			value:=value-1; //decrementing Cyclic (near realtime speed) 
+			IF value = 0 THEN
+				state := 2;
+				value := 100; // Steps to decrement by External Ticks 
+				hint := '!!! WAITING FOR EXTERNAL TICKS !!!'; 		
+				fbRtmode.ip.ChangeTickMode(E_RtMode.RtMode_Externaltick);
+			END_IF
+		ELSE 
+			state := 97; 	
+		END_IF
+	2:
+		IF(eCurrentMode = E_RtMode.RtMode_Externaltick) THEN 
+			value:=value-1; //decrementing as fast as possible 
+			IF value = 0 THEN
+				state := 0;
+				hint := '..cycling (init)...'; 		
+				(*switch back to cyclic mode*)		
+				fbRtmode.ip.ChangeTickMode(E_RtMode.RtMode_Cyclic);
+			END_IF
+		ELSE 
+			state := 98; 	
+		END_IF	
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_ExternalTick_ITc">
+      <LineId Id="208" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="205" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="221" Count="2" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="215" Count="2" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
